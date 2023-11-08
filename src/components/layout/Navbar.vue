@@ -120,20 +120,11 @@ const AuthLogin = async (isRegisterClick = false) => {
       </v-row>
     </v-container>
   </v-card>
-  <UncompleteTask :task="uncompletedTasks" /><!--  Giving Data to new -->
+  <!--  Giving Data to new -->
   <v-container class="w-50">
     <v-row>
       <v-col cols="12" md="11" sm="12">
         <AddTask @added="saveTask" />
-        <!-- {{ form }} -->
-        <!-- <v-text-field
-          variant="outlined"
-          prepend-inner-icon="mdi-plus"
-          placeholder="Add Task . Click enter to save Task, Esc to clear Task"
-          v-model="form.name"
-          @keydown.esc="close"
-          @keydown.enter="saveTask"
-        ></v-text-field> -->
       </v-col>
 
       <v-col cols="12" md="1" sm="12">
@@ -142,53 +133,11 @@ const AuthLogin = async (isRegisterClick = false) => {
     </v-row>
     <v-row>
       <v-col cols="12" md="12" sm="12">
-        <h5
-          align="center"
-          style="
-            margin-top: -10px;
-            padding-bottom: 10px;
-            text-decoration: solid;
-          "
-        >
-          <p style="font-style: italic" v-if="!uncompletedTasks.length > 0">
-            No Available Task
-          </p>
-        </h5>
-        <v-list-item
-          v-for="(items, index) in uncompletedTasks"
-          :key="index"
-          variant="outlined"
-        >
-          <template v-slot:prepend="{}">
-            <v-list-item-action start>
-              <v-checkbox-btn
-                v-model="items.is_completed"
-                @click="completeTask(items.id)"
-              ></v-checkbox-btn>
-            </v-list-item-action>
-          </template>
-          <v-list-item-title :class="iscomplete(items.is_completed)">
-            <v-row>
-              <v-col cols="12" md="6" class="mt-2">
-                <p>{{ items.name }} || {{ items.is_completed }}</p>
-              </v-col>
-              <v-col cols="12" md="6" align="right">
-                <v-icon
-                  size="small"
-                  style="padding: 20px"
-                  @click="editItem(items)"
-                  >mdi-pencil</v-icon
-                >
-                <v-icon
-                  size="small"
-                  style="padding: 20px"
-                  @click="deleteTask(items.id)"
-                  >mdi-delete</v-icon
-                >
-              </v-col>
-            </v-row>
-          </v-list-item-title>
-        </v-list-item>
+        <UncompleteTask
+          v-for="item in uncompletedTasks"
+          :task="item"
+          :key="item.id"
+        />
       </v-col>
     </v-row>
     <v-row v-if="switchComplete">
