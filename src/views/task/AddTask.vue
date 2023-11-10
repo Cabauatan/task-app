@@ -1,14 +1,18 @@
 <script setup>
 import { computed, onMounted, ref } from "vue";
 const form = ref({
+  id: null,
   name: "",
   is_completed: false,
 });
+const tempName = ref(null);
 
 const emit = defineEmits(["added"]);
 
 const saveTask = () => {
-  form.name = "";
+  form.value.id = null;
+  form.value.name = tempName.value;
+  tempName.value = null;
   emit("added", form.value);
 };
 </script>
@@ -17,7 +21,7 @@ const saveTask = () => {
     variant="outlined"
     prepend-inner-icon="mdi-plus"
     placeholder="Add Task . Click enter to save Task, Esc to clear Task"
-    v-model="form.name"
+    v-model="tempName"
     @keydown.esc="close"
     @keydown.enter="saveTask"
   ></v-text-field>

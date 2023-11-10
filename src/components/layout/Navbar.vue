@@ -1,4 +1,5 @@
 <script setup>
+import { VDataTableServer } from "vuetify/labs/VDataTable";
 import { computed, onMounted, ref } from "vue";
 import {
   allTasks,
@@ -9,73 +10,68 @@ import {
 } from "@/http/apitask";
 import UncompleteTask from "@/views/task/UncompleteTask.vue";
 import AddTask from "@/views/task/AddTask.vue";
+import CompleteTask from "@/views/task/CompleteTask.vue";
+
+const headers = [
+  { title: "Task name", key: "name", align: "start", sortable: false },
+  {
+    title: "Task completed",
+    key: "is_completed",
+    align: "start",
+    sortable: false,
+  },
+];
 
 onMounted(() => {
   fetch();
 });
 const completedTasks = ref([]);
 const uncompletedTasks = ref([]);
+const tasks = ref([]);
+const totalItems = ref(0);
+const itemsPerPage = ref(10);
 const switchComplete = ref(false);
 const editClick = ref(false);
+const loading = ref(true);
 const is_login = ref(false);
 
-const form = ref({
-  id: "",
-  name: "",
-  is_completed: false,
-});
-
 const fetch = async () => {
+  loading.value = true;
   completedTasks.value = [];
   uncompletedTasks.value = [];
   const { data } = await allTasks();
+  console.log(data);
   data.data.filter(taskcomplete);
+  totalItems.value = data.total;
+  tasks.value = data.data;
   function taskcomplete(task) {
     task.is_completed
       ? completedTasks.value.push(task)
       : uncompletedTasks.value.push(task);
   }
+  loading.value = false;
 };
 
-const saveTask = async (cat = null) => {
-  form.value = cat != null ? cat : form.value;
-  if (!editClick.value) {
-    const res = await storeTasks(form.value);
+const saveTask = async (cat) => {
+  if (cat.id != null) {
+    const res = await updateTasks(cat.id, cat);
+
     //console.log(res);
   } else {
-    const res = await updateTasks(form.value.id, form.value);
+    const res = await storeTasks(cat);
     //console.log(res);
   }
   editClick.value = false;
   fetch();
-  close();
 };
-function close() {
-  form.value.id = "";
-  form.value.name = "";
-  form.value.is_completed = false;
-}
-const iscomplete = (items) => {
-  return items ? "taskCompleted" : "";
-};
-const editItem = (items) => {
-  editClick.value = true;
-  console.log(items);
-  form.value.id = items.id;
-  form.value.name = items.name;
-};
-const completeTask = async (id) => {
-  form.value.is_completed = true;
-  const res = await completeTasks(id, form.value);
+const completeTask = async (cat) => {
+  const res = await completeTasks(cat.id, cat);
   //console.log(res);
-  close();
   fetch();
 };
-const deleteTask = async (id) => {
-  form.value.is_completed = true;
-  const res = await deleteTasks(id);
-  console.log(res);
-  close();
+const deleteTask = async (cat) => {
+  const res = await deleteTasks(cat.id);
+  // console.log(res);
   fetch();
 };
 const AuthLogin = async (isRegisterClick = false) => {
@@ -120,7 +116,6 @@ const AuthLogin = async (isRegisterClick = false) => {
       </v-row>
     </v-container>
   </v-card>
-  <!--  Giving Data to new -->
   <v-container class="w-50">
     <v-row>
       <v-col cols="12" md="11" sm="12">
@@ -133,10 +128,32 @@ const AuthLogin = async (isRegisterClick = false) => {
     </v-row>
     <v-row>
       <v-col cols="12" md="12" sm="12">
+        <h5
+          align="center"
+          style="
+            margin-top: -10px;
+            padding-bottom: 10px;
+            text-decoration: solid;
+          "
+        >
+          <v-progress-circular
+            :indeterminate="loading"
+            v-if="loading"
+          ></v-progress-circular>
+          <p
+            style="font-style: italic"
+            v-if="!uncompletedTasks.length > 0 && !loading"
+          >
+            No Task
+          </p>
+        </h5>
         <UncompleteTask
           v-for="item in uncompletedTasks"
           :task="item"
           :key="item.id"
+          @added="saveTask"
+          @update="completeTask"
+          @delete="deleteTask"
         />
       </v-col>
     </v-row>
@@ -157,43 +174,27 @@ const AuthLogin = async (isRegisterClick = false) => {
             Completed Task
           </p>
         </h5>
-
-        <v-list-item
-          v-for="(items, index) in completedTasks"
-          :key="index"
-          variant="outlined"
-        >
-          <template v-slot:prepend="{}">
-            <v-list-item-action start>
-              <v-checkbox-btn
-                v-model="items.is_completed"
-                :disabled="items.is_completed"
-              ></v-checkbox-btn>
-            </v-list-item-action>
-          </template>
-          <v-list-item-title :class="iscomplete(items.is_completed)">
-            <v-row>
-              <v-col cols="12" md="6" class="mt-2">
-                {{ items.name }} | {{ items.is_completed }}
-              </v-col>
-              <v-col cols="12" md="6" align="right">
-                <v-icon
-                  size="small"
-                  style="padding: 20px"
-                  @click="deleteTask(items.id)"
-                  >mdi-delete</v-icon
-                >
-              </v-col>
-            </v-row>
-          </v-list-item-title>
-        </v-list-item>
+        <CompleteTask
+          v-for="item in completedTasks"
+          :task="item"
+          :key="item.id"
+          @delete="deleteTask"
+        />
+      </v-col>
+    </v-row>
+    <v-row>
+      <v-col cols="12">
+        <v-data-table-server
+          v-model:items-per-page="itemsPerPage"
+          :headers="headers"
+          :items-length="totalItems"
+          :items="tasks"
+          :loading="loading"
+          :search="search"
+          item-value="name"
+          @update:options="fetch"
+        ></v-data-table-server>
       </v-col>
     </v-row>
   </v-container>
 </template>
-
-<style scoped>
-.taskCompleted {
-  text-decoration: line-through;
-}
-</style>
