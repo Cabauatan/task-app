@@ -1,6 +1,6 @@
 <script setup>
-import { VDataTableServer } from "vuetify/labs/VDataTable";
-import { computed, onMounted, ref } from "vue";
+import { onMounted, ref } from "vue";
+import { useTaskStore } from "@/stores/useTaskStore";
 import {
   allTasks,
   storeTasks,
@@ -12,24 +12,12 @@ import UncompleteTask from "@/views/task/UncompleteTask.vue";
 import AddTask from "@/views/task/AddTask.vue";
 import CompleteTask from "@/views/task/CompleteTask.vue";
 
-const headers = [
-  { title: "Task name", key: "name", align: "start", sortable: false },
-  {
-    title: "Task completed",
-    key: "is_completed",
-    align: "start",
-    sortable: false,
-  },
-];
+const taskStore = useTaskStore();
 
 onMounted(() => {
   fetch();
 });
-const completedTasks = ref([]);
-const uncompletedTasks = ref([]);
 const tasks = ref([]);
-const totalItems = ref(0);
-const itemsPerPage = ref(10);
 const switchComplete = ref(false);
 const editClick = ref(false);
 const loading = ref(true);
@@ -37,18 +25,11 @@ const is_login = ref(false);
 
 const fetch = async () => {
   loading.value = true;
-  completedTasks.value = [];
-  uncompletedTasks.value = [];
   const { data } = await allTasks();
-  console.log(data);
-  data.data.filter(taskcomplete);
-  totalItems.value = data.total;
+
+  taskStore.set_task(data.data);
+
   tasks.value = data.data;
-  function taskcomplete(task) {
-    task.is_completed
-      ? completedTasks.value.push(task)
-      : uncompletedTasks.value.push(task);
-  }
   loading.value = false;
 };
 
@@ -142,13 +123,13 @@ const AuthLogin = async (isRegisterClick = false) => {
           ></v-progress-circular>
           <p
             style="font-style: italic"
-            v-if="!uncompletedTasks.length > 0 && !loading"
+            v-if="!taskStore.get_uncomplete.length > 0 && !loading"
           >
             No Task
           </p>
         </h5>
         <UncompleteTask
-          v-for="item in uncompletedTasks"
+          v-for="item in taskStore.get_uncomplete"
           :task="item"
           :key="item.id"
           @added="saveTask"
@@ -167,33 +148,22 @@ const AuthLogin = async (isRegisterClick = false) => {
             text-decoration: solid;
           "
         >
-          <p style="font-style: italic" v-if="!completedTasks.length > 0">
+          <p
+            style="font-style: italic"
+            v-if="!taskStore.get_complete.length > 0"
+          >
             No Completed Task
           </p>
-          <p style="font-size: large" v-if="completedTasks.length > 0">
+          <p style="font-size: large" v-if="taskStore.get_complete.length > 0">
             Completed Task
           </p>
         </h5>
         <CompleteTask
-          v-for="item in completedTasks"
+          v-for="item in taskStore.get_complete"
           :task="item"
           :key="item.id"
           @delete="deleteTask"
         />
-      </v-col>
-    </v-row>
-    <v-row>
-      <v-col cols="12">
-        <v-data-table-server
-          v-model:items-per-page="itemsPerPage"
-          :headers="headers"
-          :items-length="totalItems"
-          :items="tasks"
-          :loading="loading"
-          :search="search"
-          item-value="name"
-          @update:options="fetch"
-        ></v-data-table-server>
       </v-col>
     </v-row>
   </v-container>
