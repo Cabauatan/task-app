@@ -21,7 +21,7 @@ const deleteTask = (task) => {
     <v-list-item-title class="taskCompleted">
       <v-row>
         <v-col cols="12" md="6" class="mt-2">
-          <p>{{ task.name }} || {{ task.is_completed }}</p>
+          <p>{{ task.name }}</p>
         </v-col>
         <v-col cols="12" md="6" align="right">
           <v-icon size="small" style="padding: 20px" @click="deleteTask(task)"

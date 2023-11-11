@@ -17,7 +17,6 @@ const taskStore = useTaskStore();
 onMounted(() => {
   fetch();
 });
-const tasks = ref([]);
 const switchComplete = ref(false);
 const editClick = ref(false);
 const loading = ref(true);
@@ -29,7 +28,9 @@ const fetch = async () => {
 
   taskStore.set_task(data.data);
 
-  tasks.value = data.data;
+  console.log(taskStore.get_complete_count);
+  console.log(taskStore.get_uncomplete_count);
+
   loading.value = false;
 };
 
@@ -40,7 +41,7 @@ const saveTask = async (cat) => {
     //console.log(res);
   } else {
     const res = await storeTasks(cat);
-    //console.log(res);
+    console.log(res);
   }
   editClick.value = false;
   fetch();

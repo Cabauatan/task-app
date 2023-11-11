@@ -7,9 +7,18 @@ export const useTaskStore = defineStore("useTaskStore", {
   }),
   getters: {
     get_taskAll: (state) => state.tasks,
-    get_uncomplete: (state) =>
-      state.tasks.filter((tasks) => !tasks.is_completed),
-    get_complete: (state) => state.tasks.filter((tasks) => tasks.is_completed),
+    get_uncomplete() {
+      return this.tasks.filter((tasks) => !tasks.is_completed);
+    },
+    get_complete() {
+      return this.tasks.filter((tasks) => tasks.is_completed);
+    },
+    get_complete_count() {
+      return this.get_complete.length;
+    },
+    get_uncomplete_count() {
+      return this.get_uncomplete.length;
+    },
   },
   actions: {
     async set_task(res) {
