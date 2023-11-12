@@ -1,11 +1,10 @@
 <script setup>
 import { computed, onMounted, ref } from "vue";
+import { useTaskStore } from "@/stores/useTaskStore";
 const emit = defineEmits(["delete"]);
 defineProps({ task: Object });
-const deleteTask = (task) => {
-  task.is_completed = true;
-  emit("delete", task);
-};
+
+const taskStore = useTaskStore();
 </script>
 <template>
   <h5
@@ -13,18 +12,22 @@ const deleteTask = (task) => {
     style="margin-top: -10px; padding-bottom: 10px; text-decoration: solid"
   ></h5>
   <v-list-item variant="outlined">
-    <template v-slot:prepend="{}">
-      <v-list-item-action start>
-        <v-checkbox-btn v-model="task.is_completed"></v-checkbox-btn>
-      </v-list-item-action>
-    </template>
-    <v-list-item-title class="taskCompleted">
+    <v-list-item-title>
       <v-row>
-        <v-col cols="12" md="6" class="mt-2">
-          <p>{{ task.name }}</p>
+        <v-col cols="12" md="6" align="right">
+          <v-list-item-action start>
+            <v-checkbox-btn
+              v-model="task.is_completed"
+              :label="task.name"
+              disabled
+            ></v-checkbox-btn>
+          </v-list-item-action>
         </v-col>
         <v-col cols="12" md="6" align="right">
-          <v-icon size="small" style="padding: 20px" @click="deleteTask(task)"
+          <v-icon
+            size="small"
+            style="padding: 20px"
+            @click="taskStore.delete_task(task.id)"
             >mdi-delete</v-icon
           >
         </v-col>

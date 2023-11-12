@@ -1,13 +1,6 @@
 <script setup>
 import { onMounted, ref } from "vue";
 import { useTaskStore } from "@/stores/useTaskStore";
-import {
-  allTasks,
-  storeTasks,
-  updateTasks,
-  completeTasks,
-  deleteTasks,
-} from "@/http/apitask";
 import UncompleteTask from "@/views/task/UncompleteTask.vue";
 import AddTask from "@/views/task/AddTask.vue";
 import CompleteTask from "@/views/task/CompleteTask.vue";
@@ -18,43 +11,13 @@ onMounted(() => {
   fetch();
 });
 const switchComplete = ref(false);
-const editClick = ref(false);
 const loading = ref(true);
 const is_login = ref(false);
 
 const fetch = async () => {
   loading.value = true;
-  const { data } = await allTasks();
-
-  taskStore.set_task(data.data);
-
-  console.log(taskStore.get_complete_count);
-  console.log(taskStore.get_uncomplete_count);
-
+  taskStore.get_allTask();
   loading.value = false;
-};
-
-const saveTask = async (cat) => {
-  if (cat.id != null) {
-    const res = await updateTasks(cat.id, cat);
-
-    //console.log(res);
-  } else {
-    const res = await storeTasks(cat);
-    console.log(res);
-  }
-  editClick.value = false;
-  fetch();
-};
-const completeTask = async (cat) => {
-  const res = await completeTasks(cat.id, cat);
-  //console.log(res);
-  fetch();
-};
-const deleteTask = async (cat) => {
-  const res = await deleteTasks(cat.id);
-  // console.log(res);
-  fetch();
 };
 const AuthLogin = async (isRegisterClick = false) => {
   is_login.value = !is_login.value;
@@ -101,7 +64,7 @@ const AuthLogin = async (isRegisterClick = false) => {
   <v-container class="w-50">
     <v-row>
       <v-col cols="12" md="11" sm="12">
-        <AddTask @added="saveTask" />
+        <AddTask />
       </v-col>
 
       <v-col cols="12" md="1" sm="12">
@@ -133,9 +96,6 @@ const AuthLogin = async (isRegisterClick = false) => {
           v-for="item in taskStore.get_uncomplete"
           :task="item"
           :key="item.id"
-          @added="saveTask"
-          @update="completeTask"
-          @delete="deleteTask"
         />
       </v-col>
     </v-row>
