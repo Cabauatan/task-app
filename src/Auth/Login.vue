@@ -1,13 +1,11 @@
 <script setup>
 import { reactive } from "vue";
 import { useRouter } from "vue-router";
-import { authStore } from "@/stores/authStore";
+import { useAuthStore } from "@/stores/useAuthStore";
 import NavBar from "@/components/layout/NavBar.vue";
 
-import axios from "axios";
-
 const router = useRouter();
-const auth = authStore();
+const auth = useAuthStore();
 
 const form = reactive({
   email: null,

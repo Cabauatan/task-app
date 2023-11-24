@@ -8,9 +8,9 @@ const is_login = ref(false);
 const dialog = ref(false);
 
 const AuthLogin = async (isRegisterClick = false) => {
-  // if (isRegisterClick) {
-  //   router.push({ name: "login" });
-  // }
+  if (isRegisterClick) {
+    router.push({ name: "login" });
+  }
   is_login.value = !is_login.value;
 };
 const ListTask = () => {
