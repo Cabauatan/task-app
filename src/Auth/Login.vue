@@ -13,9 +13,9 @@ const form = reactive({
 });
 
 const checkLogin = async () => {
-  // router.push({ name: Home });
   // console.log(form);
   await auth.handleLogin(form);
+  router.push("/task");
 };
 </script>
 <template>

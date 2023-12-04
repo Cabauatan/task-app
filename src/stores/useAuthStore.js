@@ -7,12 +7,17 @@ export const useAuthStore = defineStore("authStore", () => {
   const fetchUser = async () => {
     const { data } = await getUser();
     user.value = data;
+    // console.log(user.value);
   };
   const handleLogin = async (credentials) => {
-    await login(credentials).then((data) => {
-      console.log(data);
-    });
     await csrfCookie();
+    await login(credentials).then((data) => {
+      // console.log(data);
+      // console.log(data.data.token);
+      console.log(data.data.user);
+      localStorage.setItem("token", data.data.token);
+    });
+
     await fetchUser();
   };
   const handleRegister = async (newUser) => {
@@ -24,8 +29,8 @@ export const useAuthStore = defineStore("authStore", () => {
     });
   };
   const handleLogout = async () => {
-    await logout();
     user.value = null;
+    await logout();
   };
   return {
     user,
